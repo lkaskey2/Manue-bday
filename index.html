@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🗽 Manue's Dirty 30 NYC</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#030609;font-family:'Baloo 2','Chalkboard SE','Comic Sans MS',sans-serif;min-height:100vh;overflow:hidden;color:#fff}
+
+.deck{position:relative;width:100%;height:100vh;overflow:hidden}
+
+.card{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  display:flex;flex-direction:column;justify-content:flex-start;
+  opacity:0;pointer-events:none;transition:opacity .4s;
+}
+.card.active{opacity:1;pointer-events:all}
+
+/* BACKGROUNDS */
+.bg-cover{position:absolute;inset:0;z-index:0}
+.bg-hero    {background:linear-gradient(135deg,#020c1a 0%,#041628 40%,#071e35 100%)}
+.bg-day1    {background:linear-gradient(135deg,#030d1a 0%,#05163a 50%,#0a1f4a 100%)}
+.bg-day2    {background:linear-gradient(135deg,#030a0d 0%,#041520 50%,#071e2d 100%)}
+.bg-day3    {background:linear-gradient(135deg,#050310 0%,#0a0520 50%,#120830 100%)}
+.bg-day4    {background:linear-gradient(135deg,#0d0305 0%,#1a0508 50%,#200810 100%)}
+
+/* NYC skyline SVG overlay */
+.skyline{position:absolute;bottom:0;left:0;width:100%;opacity:.12;z-index:1}
+
+/* Floating emoji decorations */
+.deco{position:absolute;z-index:2;font-size:clamp(28px,6vw,52px);opacity:.18;pointer-events:none;animation:float 6s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-14px) rotate(5deg)}}
+
+.content{position:relative;z-index:10;padding:60px 20px 20px;background:linear-gradient(180deg,rgba(0,0,0,.92) 0%,rgba(0,0,0,.75) 60%,rgba(0,0,0,.4) 100%)}
+
+/* HERO CARD */
+.hero-title{font-size:clamp(28px,8vw,52px);font-weight:800;line-height:1.1;margin-bottom:6px}
+.hero-title .line1{color:#fff}
+.hero-title .line2{color:#4fbf8f}
+.hero-title .line3{color:#3a8fd4}
+.hero-sub{font-size:clamp(14px,3.5vw,18px);color:#a0c8e8;margin-bottom:20px}
+.hero-dates{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:20px;font-size:15px;font-weight:600}
+.badge-blue{background:rgba(58,143,212,.2);border:1px solid rgba(58,143,212,.5);color:#7bbfe8}
+.badge-green{background:rgba(79,191,143,.2);border:1px solid rgba(79,191,143,.5);color:#6dd4a8}
+.badge-gold{background:rgba(255,196,57,.15);border:1px solid rgba(255,196,57,.4);color:#ffd166}
+
+.flight-row{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px 16px;margin-bottom:10px;font-size:14px}
+.flight-row .fl-label{font-size:15px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#3a8fd4;margin-bottom:3px}
+.flight-row .fl-detail{color:#d0e8f8;font-weight:600}
+
+/* HOTEL */
+.hotel-box{background:rgba(79,191,143,.08);border:1px solid rgba(79,191,143,.3);border-radius:12px;padding:12px 16px;margin-bottom:10px}
+.hotel-box .h-name{font-size:16px;font-weight:700;color:#4fbf8f}
+.hotel-box .h-detail{font-size:15px;color:#c8eedd;margin-top:3px;font-weight:500}
+
+/* DAY CARDS */
+.day-label{font-size:15px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#3a8fd4;margin-bottom:4px}
+.day-title{font-size:clamp(22px,6vw,36px);font-weight:800;line-height:1.1;margin-bottom:4px}
+.day-subtitle{font-size:15px;color:#c0d8ec;margin-bottom:16px;font-weight:500}
+.stops{display:flex;flex-direction:column;gap:8px}
+.stop{display:flex;align-items:flex-start;gap:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:10px 14px}
+.stop-icon{font-size:22px;flex-shrink:0;margin-top:1px}
+.stop-text .stop-name{font-size:15px;font-weight:700;color:#e8f4ff}
+.stop-text .stop-detail{font-size:15px;color:#b8d4e8;margin-top:2px;font-weight:500}
+.stop-time{font-size:15px;font-weight:700;color:#3a8fd4;margin-left:auto;flex-shrink:0;padding-top:3px}
+
+/* NAV */
+.nav-row{position:absolute;bottom:60px;left:0;width:100%;z-index:20;display:flex;justify-content:space-between;padding:0 24px;pointer-events:none}
+.nav-btn{pointer-events:all;width:52px;height:52px;border-radius:50%;border:2px solid rgba(58,143,212,.7);background:rgba(58,143,212,.3);color:#fff;font-size:28px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;box-shadow:0 0 16px rgba(58,143,212,.4)}
+.nav-btn:hover{background:rgba(58,143,212,.6);border-color:#3a8fd4;box-shadow:0 0 24px rgba(58,143,212,.6)}
+.nav-btn:disabled{opacity:.15;cursor:default}
+
+/* DOTS */
+.dots{position:absolute;bottom:122px;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:7px}
+.dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.25);cursor:pointer;transition:all .2s}
+.dot.active{background:#3a8fd4;width:20px;border-radius:4px}
+
+/* MANUE PHOTO */
+.manue-photo{width:110px;height:110px;border-radius:50%;border:3px solid #4fbf8f;object-fit:cover;display:block;margin:0 auto 16px;box-shadow:0 0 30px rgba(79,191,143,.4)}
+.manue-placeholder{width:110px;height:110px;border-radius:50%;border:3px solid #4fbf8f;background:linear-gradient(135deg,#0a2a1a,#0d3d28);display:flex;align-items:center;justify-content:center;font-size:48px;margin:0 auto 16px;box-shadow:0 0 30px rgba(79,191,143,.4)}
+</style>
+</head>
+<body>
+<div id="sync-status" style="position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:50;background:rgba(0,0,0,.7);color:#58a6ff;font-size:12px;padding:4px 12px;border-radius:10px;pointer-events:none"></div>
+<div class="deck" id="deck">
+
+  <!-- NAV -->
+  <div class="nav-row">
+    <button class="nav-btn" id="prev" onclick="goTo(cur-1)">‹</button>
+    <button class="nav-btn" id="next" onclick="goTo(cur+1)">›</button>
+  </div>
+  <div class="dots" id="dots"></div>
+
+  <!-- CARD 0: HERO -->
+  <div class="card active" data-card="0">
+    <div class="bg-cover bg-hero"></div>
+    <div class="deco" style="top:8%;left:5%;animation-delay:0s">🗽</div>
+    <div class="deco" style="top:12%;right:8%;animation-delay:1.5s">🎂</div>
+    <div class="deco" style="top:35%;left:15%;animation-delay:3s">✨</div>
+    <div class="deco" style="top:25%;right:20%;animation-delay:2s">🎉</div>
+    <svg class="skyline" viewBox="0 0 800 120" fill="white"><rect x="0" y="80" width="30" height="40"/><rect x="35" y="60" width="20" height="60"/><rect x="60" y="70" width="25" height="50"/><rect x="90" y="40" width="15" height="80"/><rect x="95" y="20" width="5" height="20"/><rect x="110" y="55" width="30" height="65"/><rect x="145" y="45" width="20" height="75"/><rect x="170" y="30" width="25" height="90"/><rect x="200" y="50" width="20" height="70"/><rect x="225" y="35" width="30" height="85"/><rect x="260" y="60" width="20" height="60"/><rect x="285" y="25" width="15" height="95"/><rect x="288" y="10" width="3" height="15"/><rect x="305" y="50" width="25" height="70"/><rect x="335" y="40" width="20" height="80"/><rect x="360" y="55" width="30" height="65"/><rect x="395" y="30" width="20" height="90"/><rect x="420" y="45" width="25" height="75"/><rect x="450" y="60" width="20" height="60"/><rect x="475" y="35" width="30" height="85"/><rect x="510" y="50" width="20" height="70"/><rect x="535" y="20" width="15" height="100"/><rect x="538" y="5" width="3" height="15"/><rect x="555" y="45" width="25" height="75"/><rect x="585" y="55" width="20" height="65"/><rect x="610" y="40" width="30" height="80"/><rect x="645" y="60" width="20" height="60"/><rect x="670" y="30" width="25" height="90"/><rect x="700" y="50" width="20" height="70"/><rect x="725" y="35" width="30" height="85"/><rect x="760" y="55" width="20" height="65"/><rect x="785" y="45" width="15" height="75"/></svg>
+    <div class="content" style="text-align:center;padding-bottom:60px">
+      <div class="manue-placeholder" id="manue-wrap">🎂</div>
+      <div class="hero-title">
+        <div class="line1">Manue's</div>
+        <div class="line2">Dirty 30</div>
+        <div class="line3">NYC 🗽</div>
+      </div>
+      <div class="hero-sub" style="margin:10px auto 20px">July 3–6, 2026 · The Big Apple</div>
+      <div class="hero-dates" style="justify-content:center">
+        <span class="badge badge-blue">✈️ Delta 2532 · Seat 31A</span>
+        <span class="badge badge-green">🏨 Hotel Belleclaire</span>
+        <span class="badge badge-gold">🎂 Birthday Weekend</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD 1: FLIGHTS & HOTEL -->
+  <div class="card" data-card="1">
+    <div class="bg-cover bg-day1"></div>
+    <div class="deco" style="top:10%;right:10%;animation-delay:0s">✈️</div>
+    <div class="deco" style="top:20%;left:5%;animation-delay:2s">🏨</div>
+    <div class="content">
+      <div class="day-label">Travel Details</div>
+      <div class="day-title" style="color:#3a8fd4">Flights &amp; Hotel</div>
+      <div class="day-subtitle">Everything you need in one place</div>
+
+      <div class="flight-row">
+        <div class="fl-label">✈️ Outbound — July 3</div>
+        <div class="fl-detail">Delta 2532 · Seat 31A</div>
+        <div style="font-size:15px;color:#b8d4e8;margin-top:3px">Departs 7:20 AM → Arrives 10:10 AM · LGA</div>
+      </div>
+
+      <div class="flight-row">
+        <div class="fl-label">✈️ Return — July 6</div>
+        <div class="fl-detail">Delta 2536 · Seat 22C</div>
+        <div style="font-size:15px;color:#b8d4e8;margin-top:3px">Departs 7:55 AM → Arrives 10:50 AM</div>
+      </div>
+
+      <div class="hotel-box">
+        <div class="h-name">🏨 Hotel Belleclaire</div>
+        <div class="h-detail">Broadway, Upper West Side · New York, NY</div>
+        <div class="h-detail" style="margin-top:6px;font-size:15px;color:#7090a8">Check in: July 3 · Check out: July 6</div>
+      </div>
+
+
+    </div>
+  </div>
+
+  <!-- CARD 2: DAY 1 -->
+  <div class="card" data-card="2">
+    <div class="bg-cover bg-day1"></div>
+    <div class="deco" style="top:8%;left:8%;animation-delay:0s">🗽</div>
+    <div class="deco" style="top:15%;right:10%;animation-delay:1s">🌊</div>
+    <div class="content">
+      <div class="day-label">Day 1 · July 3</div>
+      <div class="day-title">Arrival Day 🛬</div>
+      <div class="day-subtitle">Check in, settle in, explore the neighborhood</div>
+      <div class="stops">
+        <div class="stop">
+          <div class="stop-icon">✈️</div>
+          <div class="stop-text">
+            <div class="stop-name">Land at LGA</div>
+            <div class="stop-detail">Delta 2532 · Grab bags · Uber/subway to hotel</div>
+          </div>
+          <div class="stop-time">10:10 AM</div>
+        </div>
+        <div class="stop">
+          <div class="stop-icon">🏨</div>
+          <div class="stop-text">
+            <div class="stop-name">Hotel Belleclaire Check-in</div>
+            <div class="stop-detail">Broadway · Drop bags, freshen up</div>
+          </div>
+          <div class="stop-time">~12 PM</div>
+        </div>
+        <div class="stop">
+          <div class="stop-icon">🌿</div>
+          <div class="stop-text">
+            <div class="stop-name">Central Park Walk</div>
+            <div class="stop-detail">Right nearby · Strawberry Fields, Bow Bridge</div>
+          </div>
+          <div class="stop-time">1–3 PM</div>
+        </div>
+        <div class="stop">
+          <div class="stop-icon">🍕</div>
+          <div class="stop-text">
+            <div class="stop-name">NYC Pizza Dinner</div>
+            <div class="stop-detail">Upper West Side · Celebrate arrival!</div>
+          </div>
+          <div class="stop-time">7 PM</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD 3: DAY 2 -->
+  <div class="card" data-card="3">
+    <div class="bg-cover bg-day2"></div>
+    <div class="deco" style="top:8%;left:8%;animation-delay:0s">🏙️</div>
+    <div class="deco" style="top:15%;right:8%;animation-delay:2s">🌉</div>
+    <div class="content">
+      <div class="day-label">Day 2 · July 4th 🎆</div>
+      <div class="day-title">Happy Birthday Manue! 🎂</div>
+      <div class="day-subtitle">Independence Day + Dirty 30 — best combo ever</div>
+      <div class="stops">
+        <div class="stop">
+          <div class="stop-icon">🗽</div>
+          <div class="stop-text">
+            <div class="stop-name">Statue of Liberty & Ellis Island</div>
+            <div class="stop-detail">Ferry from Battery Park · Book ahead!</div>
+          </div>
+          <div class="stop-time">9 AM</div>
+        </div>
+        <div class="stop">
+          <div class="stop-icon">🌉</div>
+          <div class="stop-text">
+            <div class="stop-name">Brooklyn Bridge Walk</div>
+            <div class="stop-detail">Walk across from Manhattan side · Great views</div>
+          </div>
+          <div class="stop-time">1 PM</div>
+        </div>
+        <div class="stop">
+          <div class="stop-icon">🍰</div>
+          <div class="stop-text">
+            <div class="stop-name">Birthday Dinner 🎂</div>
+            <div class="stop-detail">Special restaurant — Manue's choice!</div>
+          </div>
+          <div class="stop-time">7 PM</div>
+        </div>
+        <div class="stop">
+          <div class="stop-icon">🎆</div>
+          <div class="stop-text">
+            <div class="stop-name">4th of July Fireworks</div>
+            <div class="stop-detail">Macy's Fireworks over the Hudson · Best show in America</div>
+          </div>
+          <div class="stop-time">9 PM</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD 4: DAY 3 -->
+  <div class="card" data-card="4">
+    <div class="bg-cover bg-day3"></div>
+    <div class="deco" style="top:8%;left:8%;animation-delay:0s">🏙️</div>
+    <div class="deco" style="top:15%;right:8%;animation-delay:1.5s">🛍️</div>
+    <div class="content">
+      <div class="day-label">Day 3 · July 5</div>
+      <div class="day-title">Midtown &amp; Vibes ✨</div>
+      <div class="day-subtitle">See the big sights, shop, eat well</div>
+      <div class="stops">
+        <div class="stop">
+          <div class="stop-icon">🏙️</div>
+          <div class="stop-text">
+            <div class="stop-name">Empire State Building</div>
+            <div class="stop-detail">Top of the Rock or ESB · Book skip-the-line</div>
+          </div>
+          <div class="stop-time">10 AM</div>
+        </div>
+        <div class="stop">
+          <div class="stop-icon">🚶</div>
+          <div class="stop-text">
+            <div class="stop-name">Times Square &amp; 5th Ave</div>
+            <div class="stop-detail">Walk around, shop, soak it all in</div>
+          </div>
+          <div class="stop-time">12 PM</div>
+        </div>
+        <div class="stop">
+          <div class="stop-icon">🎭</div>
+          <div class="stop-text">
+            <div class="stop-name">High Line &amp; Chelsea Market</div>
+            <div class="stop-detail">Elevated park + amazing food hall</div>
+          </div>
+          <div class="stop-time">3 PM</div>
+        </div>
+        <div class="stop">
+          <div class="stop-icon">🍹</div>
+          <div class="stop-text">
+            <div class="stop-name">Rooftop Drinks</div>
+            <div class="stop-detail">NYC skyline views at sunset</div>
+          </div>
+          <div class="stop-time">7 PM</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD 5: DAY 4 (departure) -->
+  <div class="card" data-card="5">
+    <div class="bg-cover bg-day4"></div>
+    <div class="deco" style="top:8%;left:8%;animation-delay:0s">✈️</div>
+    <div class="deco" style="top:15%;right:8%;animation-delay:2s">💕</div>
+    <div class="content">
+      <div class="day-label">Day 4 · July 6</div>
+      <div class="day-title">Goodbye NYC 💕</div>
+      <div class="day-subtitle">One last breakfast, then homeward bound</div>
+      <div class="stops">
+        <div class="stop">
+          <div class="stop-icon">☀️</div>
+          <div class="stop-text">
+            <div class="stop-name">Early Morning</div>
+            <div class="stop-detail">Pack up · Grab coffee and a bagel</div>
+          </div>
+          <div class="stop-time">5:30 AM</div>
+        </div>
+        <div class="stop">
+          <div class="stop-icon">🚕</div>
+          <div class="stop-text">
+            <div class="stop-name">Head to Airport</div>
+            <div class="stop-detail">Allow 1hr+ for security · Delta counter</div>
+          </div>
+          <div class="stop-time">6:00 AM</div>
+        </div>
+        <div class="stop">
+          <div class="stop-icon">✈️</div>
+          <div class="stop-text">
+            <div class="stop-name">Delta 2536 · Seat 22C</div>
+            <div class="stop-detail">Departs 7:55 AM · Arrives 10:50 AM</div>
+          </div>
+          <div class="stop-time">7:55 AM</div>
+        </div>
+        <div class="stop">
+          <div class="stop-icon">🎉</div>
+          <div class="stop-text">
+            <div class="stop-name">Back Home with memories!</div>
+            <div class="stop-detail">Happy 30th Manue! 🎂🗽✨</div>
+          </div>
+          <div class="stop-time">10:50 AM</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#0d1a2a;border:1px solid #1a3a5c;border-radius:14px;padding:20px;width:100%;max-width:400px">
+    <div style="font-size:16px;font-weight:700;color:#3a8fd4;margin-bottom:14px">Edit Stop</div>
+    <input type="hidden" id="modal-card">
+    <input type="hidden" id="modal-stop">
+    <div style="margin-bottom:10px">
+      <label style="font-size:15px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#3a8fd4;display:block;margin-bottom:4px">Emoji Icon</label>
+      <input id="modal-icon" type="text" style="width:100%;background:#030d1a;border:1px solid #1a3a5c;border-radius:7px;color:#e8f4ff;font-size:16px;padding:9px 12px;outline:none" placeholder="optional">
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:15px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#3a8fd4;display:block;margin-bottom:4px">Name</label>
+      <input id="modal-name" type="text" style="width:100%;background:#030d1a;border:1px solid #1a3a5c;border-radius:7px;color:#e8f4ff;font-size:15px;padding:9px 12px;outline:none" placeholder="Stop name">
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:15px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#3a8fd4;display:block;margin-bottom:4px">Details</label>
+      <input id="modal-detail" type="text" style="width:100%;background:#030d1a;border:1px solid #1a3a5c;border-radius:7px;color:#e8f4ff;font-size:15px;padding:9px 12px;outline:none" placeholder="Address, notes…">
+    </div>
+    <div style="margin-bottom:14px">
+      <label style="font-size:15px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#3a8fd4;display:block;margin-bottom:4px">Time (optional)</label>
+      <input id="modal-time" type="text" style="width:100%;background:#030d1a;border:1px solid #1a3a5c;border-radius:7px;color:#e8f4ff;font-size:15px;padding:9px 12px;outline:none" placeholder="e.g. 2:00 PM">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <button onclick="saveStop()" style="padding:11px;background:#3a8fd4;color:#000;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">💾 Save</button>
+      <button onclick="closeModal()" style="padding:11px;background:rgba(255,255,255,.08);color:#e8f4ff;border:1px solid rgba(255,255,255,.15);border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">Cancel</button>
+    </div>
+    <button onclick="deleteStop()" style="width:100%;padding:10px;background:transparent;border:1px solid #f85149;color:#f85149;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">🗑 Delete Stop</button>
+  </div>
+</div>
+
+<script>function goTo(n) {
+  if (n < 0 || n >= total) return;
+  document.querySelectorAll('.card').forEach(function(c){ c.classList.remove('active'); });
+  document.querySelectorAll('.dot').forEach(function(d,i){ d.classList.toggle('active', i===n); });
+  document.querySelector('[data-card="'+n+'"]').classList.add('active');
+  cur = n;
+  document.getElementById('prev').disabled = (n===0);
+  document.getElementById('next').disabled = (n===total-1);
+}
+
+// Build dots
+var dotsEl = document.getElementById('dots');
+for (var i = 0; i < total; i++) {
+  var d = document.createElement('div');
+  d.className = 'dot' + (i===0?' active':'');
+  d.setAttribute('data-i', i);
+  d.onclick = (function(idx){ return function(){ goTo(idx); }; })(i);
+  dotsEl.appendChild(d);
+}
+
+// Swipe support
+var sx = 0;
+document.addEventListener('touchstart', function(e){ sx = e.touches[0].clientX; });
+document.addEventListener('touchend', function(e){
+  var dx = e.changedTouches[0].clientX - sx;
+  if (Math.abs(dx) > 50) goTo(dx < 0 ? cur+1 : cur-1);
+});
+
+// Keyboard
+document.addEventListener('keydown', function(e){
+  if (e.key==='ArrowRight') goTo(cur+1);
+  if (e.key==='ArrowLeft')  goTo(cur-1);
+});
+
+
+var cur = 0;
+var total = 6;
+var BIN_ID = '6a45d2e2f5f4af5e29514f9a';
+var API_KEY = '$2a$10$MzfuTuS.6ayizx2Vkw9E0uinctMtnHiR6HslXHNwWjp4rgnsVaxt6';
+var STORAGE_KEY = 'nyc_bin_id';
+
+// Default data - user can edit
+var tripData = {
+  0: { title: "Manue's Dirty 30 NYC 🗽", subtitle: "July 3–6, 2026 · The Big Apple" },
+  2: { label: "Day 1 · July 3", title: "Arrival Day 🛬", subtitle: "Edit your plans below ✏️",
+    stops: [
+      { icon:"✈️", name:"Land at LGA", detail:"Delta 2532 · Seat 31A · 10:10 AM", time:"10:10 AM" },
+      { icon:"🏨", name:"Hotel Belleclaire Check-in", detail:"Broadway · Drop bags, freshen up", time:"~12 PM" },
+      { icon:"📝", name:"Tap ✏️ to add your plans", detail:"What are you doing tonight?", time:"" }
+    ]
+  },
+  3: { label: "Day 2 · July 4th 🎆", title: "Happy Birthday Manue! 🎂", subtitle: "Edit your plans below ✏️",
+    stops: [
+      { icon:"🎂", name:"Birthday begins!", detail:"What's the plan?", time:"" },
+      { icon:"📝", name:"Tap ✏️ to add your plans", detail:"Add activities for the day", time:"" }
+    ]
+  },
+  4: { label: "Day 3 · July 5", title: "Day Three ✨", subtitle: "Edit your plans below ✏️",
+    stops: [
+      { icon:"📝", name:"Tap ✏️ to add your plans", detail:"What are you doing today?", time:"" }
+    ]
+  },
+  5: { label: "Day 4 · July 6", title: "Goodbye NYC 💕", subtitle: "Homeward bound",
+    stops: [
+      { icon:"☀️", name:"Early Morning", detail:"Pack up · Coffee and bagel", time:"5:30 AM" },
+      { icon:"🚕", name:"Head to Airport", detail:"Allow 1hr+ for security", time:"6:00 AM" },
+      { icon:"✈️", name:"Delta 2536 · Seat 22C", detail:"Departs 7:55 AM · Arrives 10:50 AM", time:"7:55 AM" }
+    ]
+  }
+};
+
+// Load from localStorage
+try {
+  var saved = localStorage.getItem('nyc_trip');
+  if (saved) tripData = JSON.parse(saved);
+} catch(e) {}
+
+function saveTripData() {
+  localStorage.setItem('nyc_trip', JSON.stringify(tripData));
+}
+
+function renderStops(cardIdx) {
+  var d = tripData[cardIdx];
+  if (!d || !d.stops) return '';
+  return d.stops.map(function(s, si) {
+    return '<div class="stop" onclick="editStop('+cardIdx+','+si+')" style="cursor:pointer">' +
+      '<div class="stop-icon">'+s.icon+'</div>' +
+      '<div class="stop-text">' +
+        '<div class="stop-name">'+s.name+'</div>' +
+        '<div class="stop-detail">'+s.detail+'</div>' +
+      '</div>' +
+      (s.time ? '<div class="stop-time">'+s.time+'</div>' : '') +
+    '</div>';
+  }).join('') +
+  '<div class="stop add-stop" onclick="addStop('+cardIdx+')" style="cursor:pointer;border-style:dashed;opacity:.6">' +
+    '<div class="stop-icon">➕</div>' +
+    '<div class="stop-text"><div class="stop-name">Add an event</div></div>' +
+  '</div>';
+}
+
+function loadFromCloud() {
+  if (!BIN_ID) { renderDayCards(); return; }
+  document.getElementById('sync-status').textContent = '⟳ Loading...';
+  fetch('https://api.jsonbin.io/v3/b/' + BIN_ID + '/latest', {
+    headers: { 'X-Master-Key': API_KEY }
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if (data.record && data.record.cards) {
+      tripData = data.record;
+    }
+    renderDayCards();
+    document.getElementById('sync-status').textContent = '✓ Synced';
+    setTimeout(function(){ document.getElementById('sync-status').textContent = ''; }, 2000);
+  })
+  .catch(function(){ renderDayCards(); document.getElementById('sync-status').textContent = ''; });
+}
+
+function saveToCloud() {
+  document.getElementById('sync-status').textContent = '⟳ Saving...';
+  if (!BIN_ID) {
+    // Create new bin
+    fetch('https://api.jsonbin.io/v3/b', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY, 'X-Bin-Name': 'nyc-trip' },
+      body: JSON.stringify(tripData)
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      BIN_ID = data.metadata.id;
+      try { localStorage.setItem(STORAGE_KEY, BIN_ID); } catch(e) {}
+      document.getElementById('sync-status').textContent = '✓ Saved';
+      setTimeout(function(){ document.getElementById('sync-status').textContent = ''; }, 2000);
+    })
+    .catch(function(){ document.getElementById('sync-status').textContent = '✗ Error'; });
+  } else {
+    // Update existing bin
+    fetch('https://api.jsonbin.io/v3/b/' + BIN_ID, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+      body: JSON.stringify(tripData)
+    })
+    .then(function(){ 
+      document.getElementById('sync-status').textContent = '✓ Saved for everyone';
+      setTimeout(function(){ document.getElementById('sync-status').textContent = ''; }, 2000);
+    })
+    .catch(function(){ document.getElementById('sync-status').textContent = '✗ Error'; });
+  }
+}
+
+
+function renderDayCards() {
+  [2,3,4,5].forEach(function(idx) {
+    var d = tripData[idx];
+    if (!d) return;
+    var card = document.querySelector('[data-card="'+idx+'"]');
+    if (!card) return;
+    card.querySelector('.day-label').textContent = d.label;
+    card.querySelector('.day-title').textContent = d.title;
+    card.querySelector('.day-subtitle').textContent = d.subtitle;
+    card.querySelector('.stops').innerHTML = renderStops(idx);
+  });
+}
+
+// Edit stop modal
+function editStop(cardIdx, stopIdx) {
+  var s = tripData[cardIdx].stops[stopIdx];
+  document.getElementById('modal-icon').value = s.icon;
+  document.getElementById('modal-name').value = s.name;
+  document.getElementById('modal-detail').value = s.detail;
+  document.getElementById('modal-time').value = s.time || '';
+  document.getElementById('modal-card').value = cardIdx;
+  document.getElementById('modal-stop').value = stopIdx;
+  document.getElementById('edit-modal').style.display = 'flex';
+}
+
+function addStop(cardIdx) {
+  tripData[cardIdx].stops.push({ icon:'', name:'New Event', detail:'', time:'' });
+  saveTripData();
+  renderDayCards();
+  editStop(cardIdx, tripData[cardIdx].stops.length - 1);
+}
+
+function saveStop() {
+  var cardIdx = parseInt(document.getElementById('modal-card').value);
+  var stopIdx = parseInt(document.getElementById('modal-stop').value);
+  tripData[cardIdx].stops[stopIdx] = {
+    icon: document.getElementById('modal-icon').value || '',
+    name: document.getElementById('modal-name').value,
+    detail: document.getElementById('modal-detail').value,
+    time: document.getElementById('modal-time').value
+  };
+  saveTripData();
+  saveToCloud();
+  closeModal();
+  renderDayCards();
+}
+
+function deleteStop() {
+  var cardIdx = parseInt(document.getElementById('modal-card').value);
+  var stopIdx = parseInt(document.getElementById('modal-stop').value);
+  tripData[cardIdx].stops.splice(stopIdx, 1);
+  saveTripData();
+  saveToCloud();
+  closeModal();
+  renderDayCards();
+}
+
+function closeModal() {
+  document.getElementById('edit-modal').style.display = 'none';
+}
+
+function goTo(n) {
+  if (n < 0 || n >= total) return;
+  document.querySelectorAll('.card').forEach(function(c){ c.classList.remove('active'); });
+  document.querySelectorAll('.dot').forEach(function(d,i){ d.classList.toggle('active', i===n); });
+  document.querySelector('[data-card="'+n+'"]').classList.add('active');
+  cur = n;
+  document.getElementById('prev').disabled = (n===0);
+  document.getElementById('next').disabled = (n===total-1);
+}
+
+// Build dots
+var dotsEl = document.getElementById('dots');
+for (var i = 0; i < total; i++) {
+  var d = document.createElement('div');
+  d.className = 'dot' + (i===0?' active':'');
+  d.onclick = (function(idx){ return function(){ goTo(idx); }; })(i);
+  dotsEl.appendChild(d);
+}
+
+// Swipe
+var sx = 0;
+document.addEventListener('touchstart', function(e){ sx = e.touches[0].clientX; });
+document.addEventListener('touchend', function(e){
+  var dx = e.changedTouches[0].clientX - sx;
+  if (Math.abs(dx) > 50) goTo(dx < 0 ? cur+1 : cur-1);
+});
+document.addEventListener('keydown', function(e){
+  if (e.key==='ArrowRight') goTo(cur+1);
+  if (e.key==='ArrowLeft') goTo(cur-1);
+});
+
+loadFromCloud();
+goTo(0);
+</script>
+
+</body>
+</html>
